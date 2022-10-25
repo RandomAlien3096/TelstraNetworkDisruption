@@ -57,7 +57,7 @@ model = CatBoostClassifier(iterations=1000,
                            od_type='Iter',
                            metric_period=100,
                            od_wait=100)
-# Fit model
+#Fit model
 
 model.fit(train_dataset, eval_set= eval_dataset, plot= True)
 
@@ -72,12 +72,12 @@ Ahora que tenemos nuestro modelo ya entrenado, utilizaremos la funcion predict()
 preds_class = model.predict(eval_dataset) 
 print(preds_class)
 
-#Get predicted probabilities for each class (gives us the probabilities of each choice option that it had)
+#get predicted probabilities for each class (gives us the probabilities of each choice option that it had)
 preds_proba = model.predict_proba(eval_dataset)
 print(preds_proba)
 -------------------------------------------------------------------------------------------
 
-Ya que tenemos nuestro modelo entrenado y evaluado, es hora de implementar este a nuestro archivo test.cvs. Esto para poder predecir la severidad de las fallas dependiendo de la ubicacion. 
+Ya que tenemos nuestro modelo entrenado y evaluado, es hora de implementar este a nuestro archivo test.cvs. Esto para poder predecir la severidad de las fallas dependiendo de la ubicacion. Crearemos nuestro conjunto de datos de test.csv
 
 -------------------------------------------------------------------------------------------
 print("The shape of the test data set without merging is: {}".format(test.shape()))
@@ -96,4 +96,29 @@ test_4.isnull().sum()
 print("The shape of the merged test dataset is: {}".format(test_4.shape()))
 -------------------------------------------------------------------------------------------
 
+Ahora utilizaremos el modelo en el nuevo conjunto de datos para poder predecir la severidad de fallas y en donde estas sucederan.
 
+-------------------------------------------------------------------------------------------
+predict_test = model.predict_proba(test_4) #using the trained catboost model to get the probabilities of the choices
+print(predict_test.head(15))
+print("The shape of the prediction test dataset is now: {}".format(predict_test.shape()))
+
+
+pred_df = pd.DataFrame(predict_test, columns = ['predict_0', 'predict_1', 'predict_2'])
+print(pred_df.head(15))
+print("The shape of the prediction data frame is now: {}".format(pred_df.shape()))
+
+
+submission_cat = pd.concat([test[['id']],pred_df],axis=1)
+submission_cat.to_csv('sub_cat_1.csv',index=False,header=True)
+submission_cat.head(15)
+-------------------------------------------------------------------------------------------
+
+Para poder visualizar correctamente las predicciones del data set test, tendremos que utilizar la funcion predict() con nuestro modelo entrenado para usar la grafica de dispersion. 
+
+-------------------------------------------------------------------------------------------
+predict_telstra = model.predict(test_4)
+print(predict_telstra)
+-------------------------------------------------------------------------------------------
+
+print("The shape of the final prediction is going to be: {}".format(predict_telstra.shape()))
